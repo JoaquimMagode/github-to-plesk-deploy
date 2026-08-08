@@ -10,20 +10,20 @@ tools: ["read", "write"]
 
 # Skill: Generate deploy.yml
 
-Follow this exact four-step process whenever this skill is invoked.
+Follow this exact five-step process whenever this skill is invoked.
 
 ---
 
-## Step 1 — Gather Information
+## Step 1 - Gather Information
 
 Ask the user for the values below. If any value is already visible in context (e.g. an existing `deploy.yml` is open), pre-fill it and confirm rather than asking again.
 
 | # | What to ask | Example |
 |---|---|---|
-| 1 | Server base path (Plesk vhost root) | `/var/www/vhosts/kern-up.com/subdomains/escolahonesta` |
+| 1 | Server base path (Plesk vhost root) | `/var/www/vhosts/example.com/subdomains/myapp` |
 | 2 | Frontend target directory (relative to base path) | `.httpdocs` |
 | 3 | Backend target directory (relative to base path) | `backend` |
-| 4 | PM2 app name | `escolahonesta-backend` |
+| 4 | PM2 app name | `myapp-backend` |
 | 5 | Backend entry file | `server.js` |
 | 6 | Backend health check URL (or `none` to skip) | `http://localhost:3000/api/health` |
 | 7 | Node.js version | `20` |
@@ -35,12 +35,12 @@ Ask the user for the values below. If any value is already visible in context (e
 
 ---
 
-## Step 2 — Generate the Workflow
+## Step 2 - Generate the Workflow
 
 Using the answers above, produce a complete `.github/workflows/deploy.yml` with this structure:
 
 ```
-name: CI/CD — Build & Deploy
+name: CI/CD - Build & Deploy
 
 on:
   push:
@@ -69,10 +69,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - Checkout
-      - Download frontend artifact → frontend/dist
-      - Download backend artifact → Backend/
+      - Download frontend artifact to frontend/dist
+      - Download backend artifact to Backend/
       - Generate backend .env (heredoc, no single-quote delimiter)
-      - Setup SSH (canonical pattern — verbatim)
+      - Setup SSH (canonical pattern - verbatim)
       - Prepare server directories (mkdir -p both paths)
       - Deploy frontend (rsync -az --delete, no exclusions needed for dist)
       - Deploy backend (rsync -az --delete --exclude .env --exclude node_modules --exclude uploads)
@@ -83,11 +83,11 @@ jobs:
 
 ---
 
-## Step 3 — Rules to Apply While Generating
+## Step 3 - Rules to Apply While Generating
 
 Apply every rule from the steering guide:
 
-- SSH setup step must be the **canonical verbatim pattern** — never simplify it
+- SSH setup step must be the canonical verbatim pattern - never simplify it
 - All secrets referenced in shell must be declared in `env:` on the step, not inline
 - `.env` generated with an unquoted `<<EOF` heredoc
 - rsync to backend always has the three `--exclude` flags
@@ -99,18 +99,18 @@ Apply every rule from the steering guide:
 
 ---
 
-## Step 4 — Write the File
+## Step 4 - Write the File
 
 Write the generated workflow to `.github/workflows/deploy.yml`. If a file already exists there, read it first and ask the user whether to overwrite or merge.
 
 ---
 
-## Step 5 — Post-Generation Checklist
+## Step 5 - Post-Generation Checklist
 
 After writing the file, output this checklist:
 
 ```
-✅ deploy.yml created at .github/workflows/deploy.yml
+deploy.yml created at .github/workflows/deploy.yml
 
 Next steps:
 
@@ -120,7 +120,7 @@ Next steps:
 2. Add public key to server:
    ssh-copy-id -i ~/.ssh/github_actions_deploy.pub -p 22 USER@HOST
 
-3. Add secrets to GitHub (Settings → Secrets and variables → Actions):
+3. Add secrets to GitHub (Settings > Secrets and variables > Actions):
    - SSH_HOST, SSH_PORT, SSH_USERNAME, SSH_PRIVATE_KEY
    - VITE_API_URL
    - DB_HOST, DB_USER, DB_PASSWORD, DB_NAME   (if using database)
@@ -135,7 +135,7 @@ Next steps:
 5. Push to main to trigger the pipeline.
 
 Troubleshooting:
-- "Load key: invalid format"        → re-paste private key in GitHub Secrets (full PEM with headers)
-- "Permission denied (publickey)"   → re-add .pub to /root/.ssh/authorized_keys on server
-- "MODULE_NOT_FOUND"                → check npm ci ran successfully on server
+- "Load key: invalid format"       -> re-paste private key in GitHub Secrets (full PEM with headers)
+- "Permission denied (publickey)"  -> re-add .pub to /root/.ssh/authorized_keys on server
+- "MODULE_NOT_FOUND"               -> check npm ci ran successfully on server
 ```

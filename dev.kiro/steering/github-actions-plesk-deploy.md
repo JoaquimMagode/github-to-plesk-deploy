@@ -2,9 +2,9 @@
 inclusion: manual
 ---
 
-# GitHub Actions → Plesk Deployment Guide
+# GitHub Actions to Plesk Deployment Guide
 
-Reference guide for CI/CD pipelines that build and deploy this project (React + Vite frontend, Node.js + Express backend) to a Plesk Linux VPS via SSH and rsync.
+Reference guide for CI/CD pipelines that build and deploy a React + Vite frontend and Node.js + Express backend to a Plesk Linux VPS via SSH and rsync.
 
 ---
 
@@ -14,9 +14,9 @@ Reference guide for CI/CD pipelines that build and deploy this project (React + 
 |---|---|---|---|
 | Frontend | React + TypeScript + Vite | `frontend/` | `.httpdocs/` (rsync from `frontend/dist/`) |
 | Backend | Node.js + Express | `Backend/` | `backend/` (rsync from `Backend/`) |
-| Process manager | PM2 | — | runs on server |
-| Hosting | Plesk on Linux VPS | — | `/var/www/vhosts/<domain>/subdomains/<sub>/` |
-| Deployment | SSH + rsync | — | — |
+| Process manager | PM2 | - | runs on server |
+| Hosting | Plesk on Linux VPS | - | `/var/www/vhosts/<domain>/subdomains/<sub>/` |
+| Deployment | SSH + rsync | - | - |
 
 ---
 
@@ -44,24 +44,24 @@ Reference guide for CI/CD pipelines that build and deploy this project (React + 
 
 ## SSH Key Setup (one-time)
 
-Generate a dedicated key pair — never reuse existing keys:
+Generate a dedicated key pair - never reuse existing keys:
 
 ```bash
 ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github_actions_deploy -N ""
 ```
 
-Add the **public** key to the server:
+Add the public key to the server:
 ```bash
 ssh-copy-id -i ~/.ssh/github_actions_deploy.pub -p 22 root@YOUR_SERVER_IP
 # or manually:
 cat ~/.ssh/github_actions_deploy.pub | ssh -p 22 root@YOUR_SERVER_IP "cat >> /root/.ssh/authorized_keys"
 ```
 
-Copy the **private** key content into GitHub:
+Copy the private key content into GitHub:
 ```bash
 cat ~/.ssh/github_actions_deploy
 ```
-Paste the full output (including `-----BEGIN OPENSSH PRIVATE KEY-----` / `-----END OPENSSH PRIVATE KEY-----`) into GitHub → Settings → Secrets → `SSH_PRIVATE_KEY`.
+Paste the full output (including `-----BEGIN OPENSSH PRIVATE KEY-----` / `-----END OPENSSH PRIVATE KEY-----`) into GitHub > Settings > Secrets > `SSH_PRIVATE_KEY`.
 
 Test before running the pipeline:
 ```bash
@@ -94,11 +94,11 @@ ssh -i ~/.ssh/github_actions_deploy -p 22 root@YOUR_SERVER_IP "echo 'SSH OK'"
       "echo 'SSH OK'"
 ```
 
-**Why these rules matter:**
-- `env:` block — secrets are injected as environment variables, never interpolated inside shell strings (prevents format corruption)
-- `printf '%s\n'` — preserves exact key bytes including trailing newline; `echo` adds an extra newline that breaks PEM format
-- `-o IdentitiesOnly=yes` — prevents SSH agent from offering other keys and causing auth confusion
-- `ssh-keyscan -p "$SSH_PORT"` — must use the correct port or the host key won't match
+Why these rules matter:
+- `env:` block - secrets are injected as environment variables, never interpolated inside shell strings (prevents format corruption)
+- `printf '%s\n'` - preserves exact key bytes including trailing newline; `echo` adds an extra newline that breaks PEM format
+- `-o IdentitiesOnly=yes` - prevents SSH agent from offering other keys and causing auth confusion
+- `ssh-keyscan -p "$SSH_PORT"` - must use the correct port or the host key will not match
 
 ---
 
@@ -125,23 +125,23 @@ Use an unquoted heredoc so secrets expand:
     EOF
 ```
 
-**Never** use `<<'EOF'` (single-quoted) — it prevents secret expansion.
+Never use `<<'EOF'` (single-quoted) - it prevents secret expansion.
 
 ---
 
 ## rsync Rules
 
-All rsync calls to the backend **must** exclude:
+All rsync calls to the backend must exclude:
 
 ```
---exclude ".env"        # managed separately via scp
+--exclude ".env"         # managed separately via scp
 --exclude "node_modules" # reinstalled on server
---exclude "uploads"     # server-side user files, never overwrite
+--exclude "uploads"      # server-side user files, never overwrite
 ```
 
 Always pass `-o IdentitiesOnly=yes` inside the `-e` string:
 
-```yaml
+```bash
 rsync -az --delete \
   --exclude ".env" \
   --exclude "node_modules" \
@@ -151,9 +151,9 @@ rsync -az --delete \
   "$SSH_USERNAME@$SSH_HOST:/path/to/backend/"
 ```
 
-Frontend rsync doesn't need exclusions (dist/ is a clean build output):
+Frontend rsync does not need exclusions (dist/ is a clean build output):
 
-```yaml
+```bash
 rsync -az --delete \
   -e "ssh -o IdentitiesOnly=yes -i $HOME/.ssh/id_ed25519 -p $SSH_PORT" \
   frontend/dist/ \
@@ -179,7 +179,7 @@ Always run `pm2 save` after so PM2 resurrects the process after a server reboot.
 
 ## Native Module: sharp Replacement
 
-`sharp` uses native binaries compiled per platform. When it fails on GitHub Actions runners or Plesk servers, replace it with `@resvg/resvg-js` (Rust-based prebuilt — no compile step):
+`sharp` uses native binaries compiled per platform. When it fails on GitHub Actions runners or Plesk servers, replace it with `@resvg/resvg-js` (Rust-based prebuilt - no compile step):
 
 ```bash
 npm uninstall sharp
@@ -230,11 +230,11 @@ git add Backend/uploads/.gitkeep
 
 | Error | Root Cause | Fix |
 |---|---|---|
-| `Permission denied (publickey)` | Public key not in `authorized_keys` or wrong key pasted in secret | Regenerate key pair, re-add `.pub` to server, re-paste private key in GitHub Secrets |
+| `Permission denied (publickey)` | Public key not in `authorized_keys` or wrong key pasted | Regenerate key pair, re-add `.pub` to server, re-paste private key in GitHub Secrets |
 | `Load key "...": invalid format` | Key written with `echo` or `${{ secrets.X }}` inline | Rewrite Setup SSH step using `printf '%s\n'` + `env:` block |
 | `ssh-keyscan` fails / empty host | `SSH_HOST` secret not set or typo | Add/fix the secret in GitHub repo settings |
 | `sharp` module error on linux-x64 | Native binary platform mismatch | Replace with `@resvg/resvg-js` |
 | `MODULE_NOT_FOUND` after deploy | `node_modules` not reinstalled on server | Run `npm ci --omit=dev` on server after rsync |
 | Frontend API calls fail in production | `VITE_API_URL` not injected at build time | Add `env: VITE_API_URL: ${{ secrets.VITE_API_URL }}` to the frontend build step |
-| `.env` file has `undefined` values | Secrets not set in GitHub or wrong secret names | Check Settings → Secrets for exact names matching the workflow |
+| `.env` file has `undefined` values | Secrets not set in GitHub or wrong secret names | Check Settings > Secrets for exact names matching the workflow |
 | PM2 not found on server | PM2 not globally installed | Add `npm install -g pm2` guard in the remote SSH step |
