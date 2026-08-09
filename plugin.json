@@ -1,1 +1,21 @@
-{"$schema":"https://agent-plugins.org/schemas/1.0.0/plugin.schema.json","name":"github-to-plesk-deploy","version":"1.0.0","description":"Deploy GitHub to Plesk","author":{"name":"Joaquim Magode"},"keywords":["deploy","plesk","github-actions","ci-cd","ssh","rsync","pm2","vite","nodejs","react","workflow","deployment"],"license":"MIT"}
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "github-to-plesk-deploy",
+  "version": "1.0.0",
+  "description": "Deploy GitHub to Plesk",
+  "author": {
+    "name": "Joaquim Magode"
+  },
+  "keywords": [
+    "deploy",
+    "plesk",
+    "github-actions",
+    "ci-cd",
+    "ssh",
+    "rsync",
+    "pm2",
+    "nodejs",
+    "react"
+  ],
+  "license": "MIT"
+}
