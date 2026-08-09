@@ -1,6 +1,8 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "github": {
+      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
@@ -8,10 +10,10 @@
       ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_PAT>"
-      },
-      "disabled": false
+      }
     },
     "ssh-mcp": {
+      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
@@ -23,8 +25,7 @@
         "--key=<PATH_TO_YOUR_PRIVATE_KEY>",
         "--timeout=30000",
         "--maxChars=none"
-      ],
-      "disabled": true
+      ]
     }
   }
 }
