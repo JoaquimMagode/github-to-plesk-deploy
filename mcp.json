@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_PAT>"
+      },
+      "disabled": false
+    },
+    "ssh-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ssh-mcp",
+        "--",
+        "--host=<YOUR_PLESK_SERVER_IP>",
+        "--port=<YOUR_SSH_PORT>",
+        "--user=<YOUR_SSH_USERNAME>",
+        "--key=<PATH_TO_YOUR_PRIVATE_KEY>",
+        "--timeout=30000",
+        "--maxChars=none"
+      ],
+      "disabled": true
+    }
+  }
+}

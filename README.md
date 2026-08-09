@@ -16,10 +16,22 @@ A [Kiro Power](https://kiro.dev/docs/powers/) that turns Kiro into a CI/CD speci
 
 ## Installation
 
+### From GitHub (recommended for sharing)
+
+1. Clone or download this repository:
+   ```bash
+   git clone https://github.com/Joaquim-Magode/github-to-plesk-deploy.git
+   ```
+2. Open Kiro → Powers panel
+3. Click **Add Custom Power** → **Import power from a folder**
+4. Select the cloned folder
+5. The power appears as **Deploy to Plesk** by Joaquim Magode
+
+### From a local folder
+
 1. Open Kiro → Powers panel
 2. Click **Add Custom Power** → **Import power from a folder**
 3. Select this folder
-4. The power appears as **Deploy to Plesk** by Joaquim Magode
 
 ---
 
@@ -75,6 +87,34 @@ github-to-plesk-deploy/
     └── steering/
         └── github-actions-plesk-deploy.md           # Deployment rules reference
 ```
+
+---
+
+## MCP Servers
+
+This power includes an `mcp.json` with two optional servers. Edit the placeholders with your own values after installing.
+
+### github (`@modelcontextprotocol/server-github`)
+
+Gives Kiro live access to your GitHub repo — check Actions run status, view workflow files, manage secrets.
+
+**Setup:** Create a [GitHub Personal Access Token](https://github.com/settings/tokens) with `repo` and `workflow` scopes, then replace `<YOUR_GITHUB_PAT>` in `mcp.json`.
+
+**Enabled by default.** Requires `npx` (comes with Node.js).
+
+### ssh-mcp (`ssh-mcp`)
+
+Lets Kiro run commands directly on your Plesk server — check PM2 status, tail logs, verify deployments, test SSH connectivity.
+
+**Setup:** Replace the four placeholders in `mcp.json`:
+- `<YOUR_PLESK_SERVER_IP>` — server IP or hostname
+- `<YOUR_SSH_PORT>` — SSH port (usually `22`)
+- `<YOUR_SSH_USERNAME>` — SSH user (e.g. `root`)
+- `<PATH_TO_YOUR_PRIVATE_KEY>` — local path to your ed25519 private key (e.g. `~/.ssh/github_actions_deploy`)
+
+**Disabled by default** (`"disabled": true`) — enable it after filling in your values.
+
+> Neither server transmits your credentials anywhere other than the target (GitHub API / your own server). Review `mcp.json` before enabling.
 
 ---
 

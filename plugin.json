@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "github-to-plesk-deploy",
   "version": "1.0.0",
-  "description": "Deploy GitHub to Plesk",
+  "description": "Deploy Node.js + React (Vite) projects from GitHub to Plesk shared hosting via GitHub Actions, SSH, and rsync. Generates complete deploy.yml workflows, sets up SSH keys, configures PM2, and diagnoses common deployment failures.",
   "author": {
     "name": "Joaquim Magode"
   },
@@ -15,7 +15,9 @@
     "rsync",
     "pm2",
     "nodejs",
-    "react"
+    "react",
+    "vite"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": "https://github.com/Joaquim-Magode/github-to-plesk-deploy"
 }
